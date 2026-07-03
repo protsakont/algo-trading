@@ -30,3 +30,6 @@ jobs:
 
       - name: Unit tests + coverage floor (85%, spec 09)
         run: uv run pytest -q -m "not integration" --cov --cov-fail-under=85
+
+      - name: Risk module coverage floor (90%, spec 09)
+        run: uv run coverage report --include="*/risk/*" --fail-under=90
