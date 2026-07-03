@@ -14,7 +14,7 @@
 - [x] `BacktestRunner`: (strategy_id, universe, period, config) → `BacktestReport`
 - [x] Metrics: total return, CAGR, Sharpe, Sortino, MaxDD, turnover, win rate, exposure, trade count
 - [x] Reproducibility: same config + data + seed = identical metrics (มี test)
-- [ ] Walk-forward runner + per-fold report
+- [x] Walk-forward runner + per-fold report
 **P1**
 - [ ] Monte Carlo trade-order resampling → distribution ของ MaxDD
 - [ ] Parameter sensitivity heatmap (VectorBT layer สำหรับ sweep)
