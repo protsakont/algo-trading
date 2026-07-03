@@ -15,7 +15,7 @@
 ## Requirements
 **P0**
 - [ ] `ParquetDataFeed` + `VendorIngestJob` (vendor ตาม Open Question ใน specs/00)
-- [ ] Integrity check report — fail = reject ทั้ง batch (atomic)
+- [x] Integrity check report — fail = reject ทั้ง batch (atomic)
 - [ ] No lookahead: feature ณ เวลา t ใช้ข้อมูล ≤ t เท่านั้น — มี unit test พิสูจน์ทุก feature
 **P1**
 - [ ] Incremental ingest
