@@ -88,6 +88,20 @@ Format per entry: context, decision, why.
 - **Why:** the narrowings keep M3 shippable without weakening any declared assumption;
   each is visible in the report artifact rather than buried in code.
 
+## D-012 — Parameter-sensitivity sweep: engine-agnostic core now, VectorBT evaluator deferred
+- **Context:** spec 04 P1 "Parameter sensitivity heatmap (VectorBT layer for sweep)". VectorBT
+  is stack-listed but not yet installed (D-002 lands it "with the research triage layer");
+  on Windows + Python 3.12 the numba/vectorbt install carries real friction.
+- **Decision:** implement the sweep core (`backtest/sweep.py`: `parameter_sweep` +
+  `SensitivitySurface`) engine-agnostically — it takes an injected
+  `evaluate(x, y) -> metric` and returns the heatmap surface + best cell. The concrete
+  fast VectorBT evaluator (and the actual image rendering) land later in `research/` /
+  reporting. The spec 04 line-20 checkbox stays **open** until the VectorBT evaluator ships.
+- **Why:** same pattern as D-006 (vendor) and D-009 (CLI) — build the vendor/engine-agnostic
+  core now, defer the heavy/blocked concrete piece. The surface DTO is what a heatmap draws
+  from and what overfitting analysis (spike vs plateau) reads; both VectorBT triage and the
+  real `BacktestRunner` plug into the same seam. Avoids a risky unattended heavy install.
+
 ## D-011 — Incremental ingest: empty batch over a populated store is a lenient no-op
 - **Context:** spec 02 P1 "Incremental ingest". A full ingest treats an empty vendor
   response as default-deny (you asked for data, got none). On the incremental path the
