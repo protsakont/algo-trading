@@ -13,7 +13,7 @@
 - [x] `Signal` DTO: symbol, direction (LONG/SHORT/FLAT), strength [-1,1], timestamp, strategy_id, metadata
 - [x] Baseline strategy: SMA crossover (reference implementation + test harness)
 - [x] Strategy registry + loader จาก config
-- [ ] Template + doc "วิธีเพิ่ม strategy ใหม่" (เพิ่มได้โดยแก้ ≤ 2 ไฟล์)
+- [x] Template + doc "วิธีเพิ่ม strategy ใหม่" (เพิ่มได้โดยแก้ ≤ 2 ไฟล์)
 **P1**
 - [ ] Hypothesis document template ใน `research/` (สมมติฐาน, universe, expected edge, invalidation criteria)
 
