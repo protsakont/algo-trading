@@ -12,7 +12,7 @@
 ## Requirements
 **P0**
 - [ ] `BacktestRunner`: (strategy_id, universe, period, config) → `BacktestReport`
-- [ ] Metrics: total return, CAGR, Sharpe, Sortino, MaxDD, turnover, win rate, exposure, trade count
+- [x] Metrics: total return, CAGR, Sharpe, Sortino, MaxDD, turnover, win rate, exposure, trade count
 - [ ] Reproducibility: same config + data + seed = identical metrics (มี test)
 - [ ] Walk-forward runner + per-fold report
 **P1**

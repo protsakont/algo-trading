@@ -4,6 +4,7 @@ import pytest
 
 from algotrade.domain.errors import (
     AlgoTradeError,
+    BacktestError,
     BrokerError,
     ConfigError,
     DataFeedError,
@@ -13,7 +14,7 @@ from algotrade.domain.errors import (
 
 @pytest.mark.parametrize(
     "error_type",
-    [ConfigError, DataFeedError, BrokerError, RiskRejected],
+    [ConfigError, DataFeedError, BrokerError, RiskRejected, BacktestError],
 )
 def test_domain_errors_subclass_algotrade_error(error_type: type[Exception]) -> None:
     assert issubclass(error_type, AlgoTradeError), (

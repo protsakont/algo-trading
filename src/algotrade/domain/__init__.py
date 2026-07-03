@@ -2,10 +2,18 @@
 
 from .dto import Bar, FeatureSet, Order, OrderResult, Position, RiskVerdict, Signal
 from .enums import OrderSide, OrderStatus, OrderType, SignalDirection, TradingMode
-from .errors import AlgoTradeError, BrokerError, ConfigError, DataFeedError, RiskRejected
+from .errors import (
+    AlgoTradeError,
+    BacktestError,
+    BrokerError,
+    ConfigError,
+    DataFeedError,
+    RiskRejected,
+)
 
 __all__ = [
     "AlgoTradeError",
+    "BacktestError",
     "Bar",
     "BrokerError",
     "ConfigError",

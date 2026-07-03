@@ -22,6 +22,10 @@ class BrokerError(AlgoTradeError):
     """Broker gateway failure (submit/cancel/positions)."""
 
 
+class BacktestError(AlgoTradeError):
+    """Backtest could not run or produced an unusable result."""
+
+
 class RiskRejected(AlgoTradeError):
     """An order proceeded despite a rejecting RiskVerdict.
 
