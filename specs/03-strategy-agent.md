@@ -15,7 +15,7 @@
 - [x] Strategy registry + loader จาก config
 - [x] Template + doc "วิธีเพิ่ม strategy ใหม่" (เพิ่มได้โดยแก้ ≤ 2 ไฟล์)
 **P1**
-- [ ] Hypothesis document template ใน `research/` (สมมติฐาน, universe, expected edge, invalidation criteria)
+- [x] Hypothesis document template ใน `research/` (สมมติฐาน, universe, expected edge, invalidation criteria)
 
 ## Acceptance Criteria
 - Given features เดียวกัน, When `on_features` ซ้ำ, Then signal เหมือนเดิม (deterministic; random ต้อง seed)
