@@ -57,12 +57,6 @@ def compute_metrics(
     downside = math.sqrt(sum(min(r, 0.0) ** 2 for r in returns) / len(returns))
     sortino = (mean / downside) * math.sqrt(periods_per_year) if downside else 0.0
 
-    peak = equities[0]
-    max_drawdown = 0.0
-    for equity in equities:
-        peak = max(peak, equity)
-        max_drawdown = max(max_drawdown, 1 - equity / peak)
-
     average_equity = sum(equities) / len(equities)
     turnover = float(traded_notional) / average_equity if average_equity else 0.0
 
@@ -75,9 +69,22 @@ def compute_metrics(
         cagr=cagr,
         sharpe=sharpe,
         sortino=sortino,
-        max_drawdown=max_drawdown,
+        max_drawdown=max_drawdown(equities),
         turnover=turnover,
         win_rate=win_rate,
         exposure=exposure,
         trade_count=len(round_trips),
     )
+
+
+def max_drawdown(equities: Sequence[float]) -> float:
+    """Deepest peak-to-trough fraction of an equity curve (``1 - equity/peak``,
+    peak seeded at the first point). The single source of truth for drawdown,
+    shared with Monte Carlo resampling. Values above 1.0 mean the curve went
+    negative (ruin) — callers that forbid that guard it before calling."""
+    peak = equities[0]
+    worst = 0.0
+    for equity in equities:
+        peak = max(peak, equity)
+        worst = max(worst, 1 - equity / peak)
+    return worst

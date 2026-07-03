@@ -16,7 +16,7 @@
 - [x] Reproducibility: same config + data + seed = identical metrics (มี test)
 - [x] Walk-forward runner + per-fold report
 **P1**
-- [ ] Monte Carlo trade-order resampling → distribution ของ MaxDD
+- [x] Monte Carlo trade-order resampling → distribution ของ MaxDD
 - [ ] Parameter sensitivity heatmap (VectorBT layer สำหรับ sweep)
 **P2** — latency modeling, order book replay
 
