@@ -169,17 +169,26 @@ def _ohlc_issues(symbol: str, row: ParsedRow) -> list[IntegrityIssue]:
 
 
 def _find_gaps(
-    rows: Sequence[ParsedRow], timeframe: str, gap_tolerance: float
+    rows: Sequence[ParsedRow],
+    timeframe: str,
+    gap_tolerance: float,
+    prev_timestamp: datetime | None = None,
 ) -> tuple[GapRecord, ...]:
     expected = TIMEFRAME_DELTAS.get(timeframe)
     if expected is None:
         return ()
     threshold = expected * gap_tolerance
     gaps: list[GapRecord] = []
-    for previous, current in pairwise(rows):
-        span = current.timestamp - previous.timestamp
+    # ``prev_timestamp`` seeds the scan with the last already-stored bar so a
+    # gap straddling an incremental ingest boundary is recorded even when the
+    # vendor's lower bound is exclusive and omits the boundary bar (spec 02:
+    # gaps are recorded, never silently forward-filled).
+    boundaries = [prev_timestamp, *(row.timestamp for row in rows)] if prev_timestamp else None
+    timestamps = boundaries if boundaries is not None else [row.timestamp for row in rows]
+    for previous, current in pairwise(timestamps):
+        span = current - previous
         if span > threshold:
-            gaps.append(GapRecord(after=previous.timestamp, before=current.timestamp, span=span))
+            gaps.append(GapRecord(after=previous, before=current, span=span))
     return tuple(gaps)
 
 
@@ -189,9 +198,15 @@ def check_and_parse_batch(
     rows: Sequence[Mapping[str, object]],
     *,
     gap_tolerance: float = DEFAULT_GAP_TOLERANCE,
+    prev_timestamp: datetime | None = None,
 ) -> tuple[IntegrityReport, tuple[ParsedRow, ...]]:
     """Validate a raw vendor batch, returning the parsed rows alongside the
-    report. Parsed rows are only meaningful when the report passed."""
+    report. Parsed rows are only meaningful when the report passed.
+
+    ``prev_timestamp`` is the last already-stored bar for the series (incremental
+    ingest); it lets gap detection span the ingest boundary, so a hole between
+    stored history and the new batch is recorded even when the vendor omits the
+    boundary bar."""
     if not rows:
         report = IntegrityReport(
             symbol=symbol,
@@ -239,7 +254,7 @@ def check_and_parse_batch(
                 )
             )
 
-    gaps = _find_gaps(parsed, timeframe, gap_tolerance) if not issues else ()
+    gaps = _find_gaps(parsed, timeframe, gap_tolerance, prev_timestamp) if not issues else ()
     report = IntegrityReport(
         symbol=symbol,
         timeframe=timeframe,

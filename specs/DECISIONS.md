@@ -88,6 +88,21 @@ Format per entry: context, decision, why.
 - **Why:** the narrowings keep M3 shippable without weakening any declared assumption;
   each is visible in the report artifact rather than buried in code.
 
+## D-011 — Incremental ingest: empty batch over a populated store is a lenient no-op
+- **Context:** spec 02 P1 "Incremental ingest". A full ingest treats an empty vendor
+  response as default-deny (you asked for data, got none). On the incremental path the
+  fetch resumes from the last stored bar; whether the vendor's lower bound is inclusive or
+  exclusive is unknown, so an empty response can mean either "genuinely up to date"
+  (exclusive bound) or "vendor fault".
+- **Decision:** an empty response over a populated store returns a passed no-op
+  (`rows_written=0`), NOT a rejection. A gap straddling the ingest boundary is still caught
+  by seeding gap detection with the stored cursor (`prev_timestamp`), independent of the
+  vendor's bound semantics. Empty over an *empty* store stays default-deny.
+- **Why:** rejecting every caught-up poll of an exclusive-bound vendor would raise constant
+  false alarms; the real risk (a silently forward-filled hole) is covered by the seeded gap
+  check, which is the spec-02 acceptance that actually matters. Revisit if a concrete vendor
+  turns out to signal faults via empty responses.
+
 ## D-010 — "Close-only" means strictly closing (sign-preserving), and drawdown breach allows it
 - **Context:** spec 05 lets close-only orders through halt/breaker lockouts but doesn't
   define "close-only"; a magnitude-only reading let a SELL bigger than the long flip

@@ -18,7 +18,7 @@
 - [x] Integrity check report — fail = reject ทั้ง batch (atomic)
 - [x] No lookahead: feature ณ เวลา t ใช้ข้อมูล ≤ t เท่านั้น — มี unit test พิสูจน์ทุก feature
 **P1**
-- [ ] Incremental ingest
+- [x] Incremental ingest
 - [ ] Data catalog CLI: `algotrade data ls|verify`
 **P2** — tick data, order book snapshots
 

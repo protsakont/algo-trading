@@ -1,12 +1,17 @@
 """Parquet storage layout (spec 02): one file per symbol/timeframe/year.
 
 Prices are stored as fixed-scale Decimal — never float — and timestamps as
-UTC datetimes. A batch write is two-phase (all temp files first, then a
-rename-only phase) so a mid-batch failure cannot leave a partially renamed
-mix of old and new partitions unreported; temps are cleaned up on failure.
+UTC datetimes. A batch write is two-phase: every year is staged to a temp
+file first, then renamed into place. A failure while staging leaves the live
+partitions wholly untouched (temps are cleaned up). A failure partway through
+the rename loop of a multi-year batch can commit some years but not others —
+each individual partition is still either its old or its new self (never
+half-written), but the batch is not atomic across partitions. Recovery is a
+re-run (writes are idempotent by timestamp).
 """
 
 from collections.abc import Sequence
+from datetime import datetime
 from pathlib import Path
 
 import polars as pl
@@ -90,6 +95,70 @@ def write_partitions(
                 f"partitions already exist (pass overwrite=True to replace): {existing}"
             )
 
+    return _atomic_write(targets, symbol, timeframe)
+
+
+def append_partitions(
+    root: Path,
+    symbol: str,
+    timeframe: str,
+    bars: Sequence[Bar],
+) -> list[Path]:
+    """Merge bars into existing year partitions instead of replacing them
+    (incremental ingest, spec 02 P1).
+
+    For each affected year the new rows are unioned with whatever is already
+    stored; on a duplicate timestamp the new row wins (a re-fetch corrects a
+    prior value). The merged year is written atomically, so a mid-merge
+    failure leaves the previous partitions intact.
+    """
+    if not bars:
+        return []
+    incoming = frame_from_bars(bars).with_columns(pl.col("timestamp").dt.year().alias("_year"))
+    targets: list[tuple[Path, pl.DataFrame]] = []
+    for part in incoming.partition_by("_year", as_dict=False):
+        year = int(part["_year"][0])
+        path = partition_path(root, symbol, timeframe, year)
+        new = part.drop("_year")
+        if path.exists():
+            existing = _read_partition(path, symbol, timeframe)
+            merged = (
+                pl.concat([existing, new]).unique(subset="timestamp", keep="last").sort("timestamp")
+            )
+        else:
+            merged = new.sort("timestamp")
+        targets.append((path, merged))
+    return _atomic_write(targets, symbol, timeframe)
+
+
+def latest_timestamp(root: Path, symbol: str, timeframe: str) -> datetime | None:
+    """Newest stored bar timestamp for a series, or None if nothing is stored —
+    the cursor an incremental ingest resumes from."""
+    series_dir = root / _safe_component(symbol, "symbol") / _safe_component(timeframe, "timeframe")
+    if not series_dir.exists():
+        return None
+    years = [int(p.stem) for p in series_dir.glob("*.parquet") if p.stem.isdigit()]
+    if not years:
+        return None
+    path = partition_path(root, symbol, timeframe, max(years))
+    frame = _read_partition(path, symbol, timeframe)
+    newest = frame.select(pl.col("timestamp").max()).item()
+    return newest if isinstance(newest, datetime) else None
+
+
+def _read_partition(path: Path, symbol: str, timeframe: str) -> pl.DataFrame:
+    try:
+        return pl.read_parquet(path)
+    except (OSError, pl.exceptions.PolarsError) as exc:
+        raise DataFeedError(f"failed reading partition {symbol}/{timeframe}: {exc}") from exc
+
+
+def _atomic_write(
+    targets: Sequence[tuple[Path, pl.DataFrame]], symbol: str, timeframe: str
+) -> list[Path]:
+    """Two-phase write: stage every year to a temp file, then rename-only.
+    A failure in either phase cleans up temps and reports, leaving the prior
+    partitions untouched."""
     temps: list[tuple[Path, Path]] = []
     try:
         for path, part in targets:
