@@ -70,3 +70,20 @@ Format per entry: context, decision, why.
   is reserved for on-disk data files when a vendor adapter needs them. No `unit` marker.
 - **Why:** one selection mechanism, no drift between marker and directory; the spec's
   intent (no network in unit tests) is enforced by construction (StubVendor + tmp_path).
+
+## D-009 — Spec 04 narrowings and deferrals (M3 baseline)
+- **Context:** spec 04 P0 says `BacktestRunner(strategy_id, universe, period, config)`,
+  costs "per market", and an acceptance criterion demands a working CLI.
+- **Decision:**
+  - v1 runner is single-symbol (`symbol: str`); multi-symbol universes arrive with
+    portfolio-level backtests. The P0 checkbox is checked with this narrowing recorded.
+  - One global slippage/commission pair per run (config), not per market — same
+    single-market narrowing.
+  - CLI (`algotrade backtest run ...`) is deferred to spec 08, whose runner.py owns all
+    CLI entry points; the spec 04 acceptance criterion stays open until then.
+  - Execution model — market orders fill at the same bar's close, zero latency — is
+    declared in every report (`execution_model` field), like slippage/commission.
+  - `BacktestConfig.seed` is reserved: no code path consumes randomness today; it will
+    drive the engine fill model when stochastic fills arrive.
+- **Why:** the narrowings keep M3 shippable without weakening any declared assumption;
+  each is visible in the report artifact rather than buried in code.
