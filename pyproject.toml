@@ -5,9 +5,11 @@ description = "Agent-structured algorithmic trading system (research -> backtest
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "polars>=1.42.1",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
     "structlog>=24.1",
+    "tzdata>=2026.2",
 ]
 
 [dependency-groups]
