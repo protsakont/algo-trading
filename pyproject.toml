@@ -5,6 +5,7 @@ description = "Agent-structured algorithmic trading system (research -> backtest
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "nautilus-trader>=1.230.0",
     "polars>=1.42.1",
     "pydantic>=2.7",
     "pydantic-settings>=2.3",
@@ -61,7 +62,12 @@ testpaths = ["tests"]
 markers = [
     "integration: touches real I/O or external services; excluded from the fast CI gate",
 ]
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    # nautilus_trader internals still call deprecated pandas APIs
+    "ignore:Timestamp.utcnow is deprecated",
+    "ignore:datetime.datetime.utcnow",
+]
 
 [tool.coverage.run]
 source = ["algotrade"]
@@ -70,3 +76,15 @@ branch = true
 [tool.coverage.report]
 show_missing = true
 exclude_also = ["if TYPE_CHECKING:", "\\.\\.\\."]
+
+[[tool.mypy.overrides]]
+module = "nautilus_trader.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+# The engine adapter is the one sanctioned engine boundary (CLAUDE.md rule 3);
+# nautilus's partial stubs force these relaxations HERE ONLY.
+module = "algotrade.backtest.nautilus_adapter"
+disallow_subclassing_any = false
+disallow_untyped_calls = false
+warn_return_any = false

@@ -3,6 +3,7 @@
 Tests inject these directly — the composition root is never involved.
 """
 
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from algotrade.domain.dto import (
@@ -18,11 +19,26 @@ from algotrade.domain.enums import OrderStatus, SignalDirection
 
 
 class FakeDataFeed:
+    """Honors the DataFeed contract like ParquetDataFeed: closed [start, end]
+    interval, date-only strings read as UTC midnight, sorted output."""
+
     def __init__(self, bars: list[Bar] | None = None) -> None:
         self._bars = bars or []
 
     def get_bars(self, symbol: str, start: str, end: str, timeframe: str) -> list[Bar]:
-        return [b for b in self._bars if b.symbol == symbol and b.timeframe == timeframe]
+        start_ts = self._bound(start)
+        end_ts = self._bound(end)
+        matching = [
+            b
+            for b in self._bars
+            if b.symbol == symbol and b.timeframe == timeframe and start_ts <= b.timestamp <= end_ts
+        ]
+        return sorted(matching, key=lambda b: b.timestamp)
+
+    @staticmethod
+    def _bound(value: str) -> datetime:
+        parsed = datetime.fromisoformat(value)
+        return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
 
 
 class FakeFeatureStore:

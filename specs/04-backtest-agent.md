@@ -11,9 +11,9 @@
 
 ## Requirements
 **P0**
-- [ ] `BacktestRunner`: (strategy_id, universe, period, config) → `BacktestReport`
+- [x] `BacktestRunner`: (strategy_id, universe, period, config) → `BacktestReport`
 - [x] Metrics: total return, CAGR, Sharpe, Sortino, MaxDD, turnover, win rate, exposure, trade count
-- [ ] Reproducibility: same config + data + seed = identical metrics (มี test)
+- [x] Reproducibility: same config + data + seed = identical metrics (มี test)
 - [ ] Walk-forward runner + per-fold report
 **P1**
 - [ ] Monte Carlo trade-order resampling → distribution ของ MaxDD
