@@ -11,7 +11,7 @@
 ## Requirements
 **P0**
 - [x] `Signal` DTO: symbol, direction (LONG/SHORT/FLAT), strength [-1,1], timestamp, strategy_id, metadata
-- [ ] Baseline strategy: SMA crossover (reference implementation + test harness)
+- [x] Baseline strategy: SMA crossover (reference implementation + test harness)
 - [x] Strategy registry + loader จาก config
 - [ ] Template + doc "วิธีเพิ่ม strategy ใหม่" (เพิ่มได้โดยแก้ ≤ 2 ไฟล์)
 **P1**
