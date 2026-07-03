@@ -43,3 +43,30 @@ Format per entry: context, decision, why.
 - **Decision:** `dict[str, str]` — numeric metadata must be stringified by the strategy.
 - **Why:** keeps the DTO JSON-trivial and mypy-strict friendly; widen deliberately
   (with a new decision entry) if a real strategy needs structured metadata.
+
+## D-006 — Vendor adapter deferred; ingest built against a VendorSource protocol
+- **Context:** spec 02 P0 item 1 ("ParquetDataFeed + VendorIngestJob") parenthesizes the
+  vendor with the blocking Open Question in specs/00 (market/universe -> vendor).
+- **Decision:** ParquetDataFeed and VendorIngestJob are implemented now; the job consumes
+  a data-module-internal `VendorSource` protocol (raw rows: Decimal/int/str values,
+  tz-aware timestamps — floats rejected by the integrity check). The concrete vendor
+  adapter lands once the market/vendor question is answered; P0 checkbox 1 stays open
+  until then.
+- **Why:** everything except the vendor HTTP/SDK call is vendor-agnostic; blocking all of
+  M2 on the vendor choice would serialize work needlessly.
+
+## D-007 — tzdata added as a dependency
+- **Context:** polars requires the IANA timezone database for tz-aware dtypes; Windows
+  Python installs don't ship one (uv-managed CPython included).
+- **Decision:** depend on `tzdata` (pure-data package, no code).
+- **Why:** platform shim for a stack-listed library, not a new library choice; harmless
+  on Linux/macOS where the system database exists.
+
+## D-008 — Unit-test conventions vs spec 02 acceptance wording
+- **Context:** spec 02 acceptance says fixtures live in `tests/fixtures/` and unit tests
+  run with `-m unit`; the project convention (CLAUDE.md/M1) is directory-based selection
+  (`tests/unit/`) with an `integration` marker excluded from the fast gate.
+- **Decision:** keep directory-based selection and inline builder helpers; `tests/fixtures/`
+  is reserved for on-disk data files when a vendor adapter needs them. No `unit` marker.
+- **Why:** one selection mechanism, no drift between marker and directory; the spec's
+  intent (no network in unit tests) is enforced by construction (StubVendor + tmp_path).
