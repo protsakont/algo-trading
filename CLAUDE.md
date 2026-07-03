@@ -26,7 +26,7 @@ uv run pytest tests/unit -q      # fast loop (integration tests are marked and e
 uv run pytest tests/unit/risk/test_limits.py::test_max_drawdown_trips -q   # single test
 uv run pytest --cov=src/algotrade --cov-report=term-missing   # coverage
 uv run ruff check . && uv run ruff format --check .
-uv run mypy src/
+uv run mypy src/ tests/
 ```
 Coverage floors (CI-enforced, override the global 80% rule): **85% overall, 90% on `risk/` and `execution/`**.
 

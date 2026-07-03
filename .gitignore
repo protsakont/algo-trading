@@ -16,7 +16,8 @@ htmlcov/
 .env.*
 
 # Data (never commit market data; reports/gates/ evidence IS committed)
-data/
+# Root-anchored: must not swallow src/algotrade/data/
+/data/
 *.parquet
 
 # OS / editor
