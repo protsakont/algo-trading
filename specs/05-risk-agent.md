@@ -10,12 +10,12 @@ Pre-trade risk layer อิสระ — **ทุก order ต้องผ่า
 - Halt state persist ลง disk — restart แล้วยัง halt, ต้อง manual reset
 
 ## Checks (P0 ทั้งหมด)
-- [ ] MaxPositionCheck — position ต่อ symbol ≤ X% equity
-- [ ] MaxGrossExposureCheck
-- [ ] MaxOrderSizeCheck — กัน fat-finger
-- [ ] DailyLossCircuitBreaker — แตะ limit → reject order เปิดใหม่, อนุญาตเฉพาะ order ลด exposure
-- [ ] DrawdownCircuitBreaker — ต่ำกว่า HWM เกิน Y% → halt + alert CRITICAL
-- [ ] HaltStateCheck — halt แล้ว reject ทุกอย่างยกเว้น close-only
+- [x] MaxPositionCheck — position ต่อ symbol ≤ X% equity
+- [x] MaxGrossExposureCheck
+- [x] MaxOrderSizeCheck — กัน fat-finger
+- [x] DailyLossCircuitBreaker — แตะ limit → reject order เปิดใหม่, อนุญาตเฉพาะ order ลด exposure
+- [x] DrawdownCircuitBreaker — ต่ำกว่า HWM เกิน Y% → halt + alert CRITICAL
+- [x] HaltStateCheck — halt แล้ว reject ทุกอย่างยกเว้น close-only
 
 ## Design Rules
 - `RiskVerdict` = {approved, reason, check_name} — ไม่ใช้ exception เป็น control flow

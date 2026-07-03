@@ -87,3 +87,18 @@ Format per entry: context, decision, why.
     drive the engine fill model when stochastic fills arrive.
 - **Why:** the narrowings keep M3 shippable without weakening any declared assumption;
   each is visible in the report artifact rather than buried in code.
+
+## D-010 — "Close-only" means strictly closing (sign-preserving), and drawdown breach allows it
+- **Context:** spec 05 lets close-only orders through halt/breaker lockouts but doesn't
+  define "close-only"; a magnitude-only reading let a SELL bigger than the long flip
+  into a fresh short while halted (caught in qa review).
+- **Decision:** exposure-reducing = the resulting position lies strictly between the
+  current position and flat (opposite side, quantity <= |held|, sign preserved or zero).
+  Position flips are OPENING orders everywhere. DrawdownCircuitBreaker halts + alerts
+  CRITICAL on breach but passes strictly-closing orders, otherwise a >=20% drawdown
+  would trap every position (de-risking must stay possible). The CRITICAL alert fires
+  once per transition, not per order. MaxOrderSizeCheck has NO close-only exception —
+  a fat-fingered close is still a fat finger.
+- **Why:** the bypass class the reviewer demonstrated is exactly what spec 05's
+  acceptance criterion ("no input gets an over-limit order approved") forbids; the
+  property tests now use an implementation-independent oracle for this definition.
